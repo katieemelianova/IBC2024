@@ -60,17 +60,6 @@ te_counts_total<-data.frame(species=rep(species_tree.rooted$tip.label, each=3),
   rbind(te_counts)
 
 
-
-
-d3 <- data.frame(id = rep(species_tree.rooted$tip.label, each=2),
-                 value = abs(rnorm(56, mean=100, sd=50)),
-                 category = rep(LETTERS[1:2], 28))
-
-
-p3<-p2 + geom_facet(panel = 'bar', data = d3, geom = geom_bar, 
-               mapping = aes(x = value, fill = as.factor(category)), 
-               orientation = 'y', width = 0.8, stat='identity')
-
 p4<-p2 + geom_facet(panel = 'bar', data = te_counts_total, geom = geom_bar, 
                     mapping = aes(x = number, fill = as.factor(class)), 
                     orientation = 'y', width = 0.8, stat='identity') +
@@ -78,7 +67,10 @@ p4<-p2 + geom_facet(panel = 'bar', data = te_counts_total, geom = geom_bar,
   theme(strip.text.x = element_text(size = 15))
 
 p4<-facet_labeller(p4, c(Tree = "Species", bar = "Number of TEs"))
+
+pdf("IBC2024_te_count_tree.pdf", width=15, height=10, onefile=FALSE)
 facet_widths(p4, widths = c(2, 1))
+dev.off()
 
 
 ######################################################
