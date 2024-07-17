@@ -6,19 +6,19 @@
 #######################################################################################################################################
 
 te_counts<-read.table("te_counts.txt") %>% 
-  set_colnames(c("path", "class", "number", "length", "bp", "percent", "%")) %>% 
+  set_colnames(c("species", "class", "number", "length", "bp", "percent", "%")) %>% 
   dplyr::select(-c("bp", "%")) %>%
-  mutate(path = case_when(grepl('impolita', path) ~ "D. impolita",
-                          grepl('pancheri', path) ~ "D. pancheri",
-                          grepl('revolutissima', path) ~ "D. revolutissima",
-                          grepl('sandwicensis', path) ~ "D. sandwicensis",
-                          grepl('vieillardii', path) ~ "D. vieillardii",
-                          grepl('yahouensis', path) ~ "D. yahouensis"))
-
+  mutate(species = case_when(grepl('impolita', species) ~ "D. impolita",
+                          grepl('pancheri', species) ~ "D. pancheri",
+                          grepl('revolutissima', species) ~ "D. revolutissima",
+                          grepl('sandwicensis', species) ~ "D. sandwicensis",
+                          grepl('vieillardii', species) ~ "D. vieillardii",
+                          grepl('yahouensis', species) ~ "D. yahouensis"),
+         class = ifelse(class == "transposons", "DNA transposon", class))
 
 
 ##################################################
-#     draw rooted highltighted species tree      #
+#                read in species tree            #
 ################################################## 
 
 species_tree<-ape::read.tree("/Users/katieemelianova/Desktop/Diospyros/diospyros_plots/lib1234_speciestree.editedTiplabs.nwk")
@@ -51,6 +51,14 @@ p2<-p + geom_tiplab(size=6, aes(color=tipcols), offset=0.002, show.legend=FALSE)
 
 p2
 
+te_counts_total<-data.frame(species=rep(species_tree.rooted$tip.label, each=3),
+           class=rep(te_counts$class %>% unique(), length(species_tree.rooted$tip.label)),
+           number = rep(0, length(species_tree.rooted$tip.label) * 3),
+           length = rep(0, length(species_tree.rooted$tip.label) * 3),
+           percent = rep(0, length(species_tree.rooted$tip.label) * 3)) %>% 
+  filter(!(species %in% te_counts$species)) %>%
+  rbind(te_counts)
+
 
 
 
@@ -63,7 +71,14 @@ p3<-p2 + geom_facet(panel = 'bar', data = d3, geom = geom_bar,
                mapping = aes(x = value, fill = as.factor(category)), 
                orientation = 'y', width = 0.8, stat='identity')
 
-facet_widths(p3, widths = c(2, 1))
+p4<-p2 + geom_facet(panel = 'bar', data = te_counts_total, geom = geom_bar, 
+                    mapping = aes(x = number, fill = as.factor(class)), 
+                    orientation = 'y', width = 0.8, stat='identity') +
+  scale_fill_manual(values = c("#F21A00", "#EBCC2A", "#3B9AB2")) +
+  theme(strip.text.x = element_text(size = 15))
+
+p4<-facet_labeller(p4, c(Tree = "Species", bar = "Number of TEs"))
+facet_widths(p4, widths = c(2, 1))
 
 
 ######################################################
