@@ -1,3 +1,22 @@
+
+#######################################################################################################################################
+#     get LTR and DNA transposon counts for species                                                                                   #
+#    grep -e "Copia" -e "Gypsy" -e "DNA transposons" /lisc/scratch/botany/katie/assembled_genomes/assemblies/*/working/*tbl  
+#.    pase output into this directory under "te_counts.txt"
+#######################################################################################################################################
+
+te_counts<-read.table("te_counts.txt") %>% 
+  set_colnames(c("path", "class", "number", "length", "bp", "percent", "%")) %>% 
+  dplyr::select(-c("bp", "%")) %>%
+  mutate(path = case_when(grepl('impolita', path) ~ "D. impolita",
+                          grepl('pancheri', path) ~ "D. pancheri",
+                          grepl('revolutissima', path) ~ "D. revolutissima",
+                          grepl('sandwicensis', path) ~ "D. sandwicensis",
+                          grepl('vieillardii', path) ~ "D. vieillardii",
+                          grepl('yahouensis', path) ~ "D. yahouensis"))
+
+
+
 ##################################################
 #     draw rooted highltighted species tree      #
 ################################################## 
@@ -31,6 +50,8 @@ p2<-p + geom_tiplab(size=6, aes(color=tipcols), offset=0.002, show.legend=FALSE)
   expand_limits(x = 0.1)
 
 p2
+
+
 
 
 d3 <- data.frame(id = rep(species_tree.rooted$tip.label, each=2),
